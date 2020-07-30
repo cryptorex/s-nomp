@@ -14,7 +14,6 @@ var PoolWorker = require('./libs/poolWorker.js');
 var PaymentProcessor = require('./libs/paymentProcessor.js');
 var Website = require('./libs/website.js');
 var ProfitSwitch = require('./libs/profitSwitch.js');
-var CreateRedisClient = require('./libs/createRedisClient.js');
 
 var algos = require('stratum-pool/lib/algoProperties.js');
 
@@ -203,7 +202,7 @@ var spawnPoolWorkers = function(){
             delete poolConfigs[coin];
         } else if (!connection) {
             redisConfig = pcfg.redis;
-            connection = CreateRedisClient(redisConfig);
+            connection = redis.createClient(redisConfig.port, redisConfig.host);
             if (redisConfig.password != "") {
                 connection.auth(redisConfig.password);
                 connection.on("error", function (err) {
@@ -211,7 +210,8 @@ var spawnPoolWorkers = function(){
                 });
             }
             connection.on('ready', function(){
-                logger.debug('PPLNT', coin, 'TimeShare processing setup with redis (' + connection.snompEndpoint + ')');
+                logger.debug('PPLNT', coin, 'TimeShare processing setup with redis (' + redisConfig.host +
+                    ':' + redisConfig.port  + ')');
             });
         }
     });

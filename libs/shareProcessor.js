@@ -1,6 +1,5 @@
 var redis = require('redis');
 var Stratum = require('stratum-pool');
-var CreateRedisClient = require('./createRedisClient.js');
 
 
 
@@ -27,12 +26,13 @@ module.exports = function(logger, poolConfig){
     var logComponent = coin;
     var logSubCat = 'Thread ' + (parseInt(forkId) + 1);
     
-    var connection = CreateRedisClient(redisConfig);
+    var connection = redis.createClient(redisConfig.port, redisConfig.host);
     if (redisConfig.password) {
         connection.auth(redisConfig.password);
     }
     connection.on('ready', function(){
-        logger.debug(logSystem, logComponent, logSubCat, 'Share processing setup with redis (' + connection.snompEndpoint + ')');
+        logger.debug(logSystem, logComponent, logSubCat, 'Share processing setup with redis (' + redisConfig.host +
+            ':' + redisConfig.port  + ')');
     });
     connection.on('error', function(err){
         logger.error(logSystem, logComponent, logSubCat, 'Redis client had an error: ' + JSON.stringify(err))
